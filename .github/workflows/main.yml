@@ -1,0 +1,28 @@
+name: Build Python Executables
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: 3.12
+      - name: Install PyInstaller
+        run: pip install pyinstaller
+      - name: Build with PyInstaller
+        run: pyinstaller --onefile --name ferret ferret.py
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: ferret-${{ matrix.os }}
+          path: dist/ferret*
