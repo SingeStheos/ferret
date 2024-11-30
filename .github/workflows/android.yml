@@ -44,12 +44,13 @@ jobs:
         echo "PATH=$PATH:$HOME/Android/Sdk/cmdline-tools/latest/bin:$HOME/Android/Sdk/platform-tools" >> $GITHUB_ENV
 
         # Check for cached licenses
-        uses: actions/cache@v3
-        with:
-          path: ${{ runner.temp }}/android-licenses
-          key: ${{ runner.os }}-android-licenses-${{ hashFiles('Android/Sdk/cmdline-tools/latest/licenses/*.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-android-licenses-
+        - name: Cache Android SDK licenses
+          uses: actions/cache@v3
+          with:
+            path: ${{ runner.temp }}/android-licenses
+            key: ${{ runner.os }}-android-licenses-${{ hashFiles('Android/Sdk/cmdline-tools/latest/licenses/*.txt') }}
+            restore-keys: |
+              ${{ runner.os }}-android-licenses-
 
         # Accept licenses (if not cached)
         run: |
