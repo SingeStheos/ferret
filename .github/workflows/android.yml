@@ -43,11 +43,29 @@ jobs:
         echo "ANDROID_SDK_ROOT=$HOME/Android/Sdk" >> $GITHUB_ENV
         echo "PATH=$PATH:$HOME/Android/Sdk/cmdline-tools/latest/bin:$HOME/Android/Sdk/platform-tools" >> $GITHUB_ENV
 
-        # Start a background process to wait and send 'y'
-        (sleep 60; echo y) | $HOME/Android/Sdk/cmdline-tools/latest/bin/sdkmanager --licenses || true
-        
+        # Check for cached licenses
+        uses: actions/cache@v3
+        with:
+          path: ${{ runner.temp }}/android-licenses
+          key: ${{ runner.os }}-android-licenses-${{ hashFiles('Android/Sdk/cmdline-tools/latest/licenses/*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-android-licenses-
+
+        # Accept licenses (if not cached)
+        run: |
+          if [ ! -d ${{ runner.temp }}/android-licenses ]; then
+            (sleep 60; echo y) | $HOME/Android/Sdk/cmdline-tools/latest/bin/sdkmanager --licenses || true
+            mv $HOME/Android/Sdk/cmdline-tools/latest/licenses ${{ runner.temp }}/android-licenses
+          fi
+
+        continue-on-error: true  # Allow build to continue even if licenses aren't accepted (first run)
+
         # Install SDK components
-        $HOME/Android/Sdk/cmdline-tools/latest/bin/sdkmanager "platform-tools" "build-tools;33.0.2" "platforms;android-30"
+        $HOME/Android/Sdk/cmdline-tools/latest/bin/sdkmanager \
+          "platform-tools" \
+          "build-tools;33.0.2" \
+          "platforms;android-30" \
+          (if [ -d ${{ runner.temp }}/android-licenses ]; then echo ""; else echo "--licenses"; fi)
 
     - name: Install Python dependencies
       run: |
