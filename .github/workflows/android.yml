@@ -43,11 +43,11 @@ jobs:
         echo "ANDROID_SDK_ROOT=$HOME/Android/Sdk" >> $GITHUB_ENV
         echo "PATH=$PATH:$HOME/Android/Sdk/cmdline-tools/latest/bin:$HOME/Android/Sdk/platform-tools" >> $GITHUB_ENV
 
-        # Use environment variable to suppress license prompts and install required components
+        # Ensure non-interactive license acceptance and installation of build tools
         export ANDROID_HOME=$HOME/Android/Sdk
         export ANDROID_SDK_ROOT=$ANDROID_HOME
-        yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
-        yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platform-tools" "build-tools;36.0.0-rc1" "platforms;android-30"
+        yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --sdk_root=$ANDROID_HOME --licenses || true
+        $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --sdk_root=$ANDROID_HOME "platform-tools" "build-tools;33.0.2" "platforms;android-30"
 
     - name: Install Python dependencies
       run: |
