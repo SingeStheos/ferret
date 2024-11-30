@@ -32,6 +32,9 @@ jobs:
         # Install required dependencies
         sudo apt install -y openjdk-8-jdk
 
+        # Create the SDK directory
+        mkdir -p $HOME/Android/Sdk
+
         # Download and install Android SDK Command-Line Tools
         wget https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip -O android-sdk-tools.zip
         unzip android-sdk-tools.zip -d $HOME/Android/Sdk
