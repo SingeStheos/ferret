@@ -39,6 +39,10 @@ jobs:
         wget https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip -O android-sdk-tools.zip
         unzip android-sdk-tools.zip -d $HOME/Android/Sdk
 
+        # Create a symbolic link to the latest tools
+        mv $HOME/Android/Sdk/cmdline-tools $HOME/Android/Sdk/cmdline-tools-$(date +%Y%m%d)
+        ln -s $HOME/Android/Sdk/cmdline-tools-$(date +%Y%m%d) $HOME/Android/Sdk/cmdline-tools
+
         # Set environment variables for Android SDK
         echo "ANDROID_HOME=$HOME/Android/Sdk" >> $GITHUB_ENV
         echo "PATH=$PATH:$HOME/Android/Sdk/cmdline-tools/latest/bin" >> $GITHUB_ENV
