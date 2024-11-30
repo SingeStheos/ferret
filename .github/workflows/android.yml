@@ -1,8 +1,5 @@
 name: Android APK Build
 
-env:
-  ACTIONS_STEP_DEBUG: true
-
 on:
   push:
     branches:
@@ -13,6 +10,9 @@ jobs:
   build-apk:
     runs-on: ubuntu-latest
 
+    env:
+      ACTIONS_STEP_DEBUG: true  # Enable debug logging
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
@@ -20,17 +20,43 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v3
       with:
-        python-version: 3.8  # Use a supported Python version
+        python-version: 3.8
 
     - name: Install dependencies
       run: |
         sudo apt update
-        sudo apt install -y build-essential python3-pip git zip
-        pip install buildozer Cython
+        sudo apt install -y build-essential python3-pip git zip libffi-dev libssl-dev wget unzip
+
+    - name: Install Android SDK Command-Line Tools
+      run: |
+        # Install required dependencies
+        sudo apt install -y openjdk-8-jdk
+
+        # Download and install Android SDK Command-Line Tools
+        wget https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip -O android-sdk-tools.zip
+        unzip android-sdk-tools.zip -d $HOME/Android/Sdk
+
+        # Set environment variables for Android SDK
+        echo "ANDROID_HOME=$HOME/Android/Sdk" >> $GITHUB_ENV
+        echo "PATH=$PATH:$HOME/Android/Sdk/cmdline-tools/latest/bin" >> $GITHUB_ENV
+
+        # Install AIDL and other necessary SDK components
+        yes | $HOME/Android/Sdk/cmdline-tools/latest/bin/sdkmanager --licenses
+        $HOME/Android/Sdk/cmdline-tools/latest/bin/sdkmanager "platform-tools" "build-tools;30.0.3" "platforms;android-30"
+
+    - name: Install Buildozer
+      run: |
+        pip install buildozer
+
+    - name: Ensure buildozer.spec exists
+      run: |
+        if [ ! -f buildozer.spec ]; then
+          echo "No buildozer.spec found. Please generate it with 'buildozer init'."
+          exit 1
+        fi
 
     - name: Build APK
       run: |
-        sudo apt install -y libffi-dev libssl-dev
         buildozer android debug
         ls bin/
 
