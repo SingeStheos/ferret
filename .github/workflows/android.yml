@@ -29,34 +29,26 @@ jobs:
 
     - name: Install Android SDK Command-Line Tools
       run: |
-        # Install required dependencies
         sudo apt install -y openjdk-8-jdk
-
-        # Create the SDK directory
         mkdir -p $HOME/Android/Sdk
-
-        # Download and install Android SDK Command-Line Tools
         wget https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip -O android-sdk-tools.zip
         unzip android-sdk-tools.zip -d $HOME/Android/Sdk
 
-        # Move cmdline-tools to ensure proper directory structure
-        mv $HOME/Android/Sdk/cmdline-tools $HOME/Android/Sdk/cmdline-tools-temp
-
-        # Create the 'latest' directory and move the extracted tools there
+        # Fix cmdline-tools directory structure for latest/bin
         mkdir -p $HOME/Android/Sdk/cmdline-tools/latest
-        mv $HOME/Android/Sdk/cmdline-tools-temp/* $HOME/Android/Sdk/cmdline-tools/latest/
+        mv $HOME/Android/Sdk/cmdline-tools/* $HOME/Android/Sdk/cmdline-tools/latest/
 
         # Set environment variables for Android SDK
         echo "ANDROID_HOME=$HOME/Android/Sdk" >> $GITHUB_ENV
         echo "PATH=$PATH:$HOME/Android/Sdk/cmdline-tools/latest/bin" >> $GITHUB_ENV
 
-        # Install AIDL and other necessary SDK components
-        yes | $HOME/Android/Sdk/cmdline-tools/latest/bin/sdkmanager --licenses
-        $HOME/Android/Sdk/cmdline-tools/latest/bin/sdkmanager "platform-tools" "build-tools;30.0.3" "platforms;android-30"
+        # Accept licenses automatically and install required SDK components
+        yes | $HOME/Android/Sdk/cmdline-tools/latest/bin/sdkmanager --licenses || true
+        $HOME/Android/Sdk/cmdline-tools/latest/bin/sdkmanager "platform-tools" "build-tools;36.0.0-rc1" "platforms;android-30"
 
     - name: Install Buildozer
       run: |
-        pip install buildozer cython
+        pip install buildozer
 
     - name: Ensure buildozer.spec exists
       run: |
